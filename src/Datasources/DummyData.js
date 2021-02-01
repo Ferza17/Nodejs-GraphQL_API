@@ -29,6 +29,13 @@ let PostDummyData = [
         author: "ABC123",
     },
     {
+        id: "POST1.2",
+        title: "A First 1.2 Post",
+        body: "First 1.2 Post Body",
+        published: false,
+        author: "ABC123",
+    },
+    {
         id: "POST2",
         title: "A New Post 2",
         body: "First Post Body 2",
@@ -44,9 +51,31 @@ let PostDummyData = [
     }
 ]
 
+let CommentsDummyData = [
+    {
+        id: "COM1",
+        text: "Comments 1",
+        author: "ABC123",
+        post: "POST3"
+    },
+    {
+        id: "COM2",
+        text: "Comments 2",
+        author: "CDE123",
+        post: "POST3"
+    },
+    {
+        id: "COM3",
+        text: "Comments 3",
+        author: "EFG123",
+        post: "POST3"
+    },
+]
+
 const db = {
-    User : UserDummyData,
-    Post: PostDummyData
+    User: UserDummyData,
+    Post: PostDummyData,
+    Comment: CommentsDummyData
 }
 
 export {db as default}

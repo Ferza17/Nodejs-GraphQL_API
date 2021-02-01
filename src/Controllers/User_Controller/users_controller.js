@@ -9,7 +9,7 @@ const users = (parent, args, ctx, info) => {
 }
 
 
-const UserPost = (parent, args, ctx, info) => {
+const GetUserPost = (parent, args, ctx, info) => {
     return Services.GetUserPost(parent, args, ctx)
 }
 
@@ -17,15 +17,20 @@ const CreateUser = (parent, args, ctx, info) => {
     return Services.CreateUser(parent, args, ctx)
 }
 
+const UpdateUser = (parent, args, ctx, id) => {
+    return Services.UpdateUser(parent, args, ctx)
+}
+
 const DeleteUser = (parent, args, ctx, info) => {
     return Services.DeleteUser(parent, args, ctx)
 }
 
 const Controller = {
+    CreateUser,
     me,
     users,
-    UserPost,
-    CreateUser,
+    GetUserPost,
+    UpdateUser,
     DeleteUser
 }
 
