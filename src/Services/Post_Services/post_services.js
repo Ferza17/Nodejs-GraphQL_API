@@ -13,12 +13,19 @@ const Create_Post_Service = (parent, args, ctx) => {
     }
 
     ctx.db.Post.push(post)
-
+    if (args.data.published) {
+        ctx.pubsub.publish("post", {
+            post: {
+                mutation: "CREATED",
+                data: post
+            }
+        })
+    }
     return post
 
 }
 
-const GetPost = (parent, args, ctx) => {
+const Get_Post_Service = (parent, args, ctx) => {
     if (!args.query) {
         return ctx.db.Post
     }
@@ -32,14 +39,13 @@ const GetPost = (parent, args, ctx) => {
     })
 }
 
-const GetAuthorPost = (parent, args, ctx) => {
+const Get_Author_Post_Service = (parent, args, ctx) => {
     return ctx.db.User.find(user => {
         return user.id === parent.author
     })
 }
 
 const Get_Post_Comments = (parent, args, ctx) => {
-
     return ctx.db.Comment.filter((comment) => {
         return comment.post === parent.id
     })
@@ -54,6 +60,8 @@ const Update_Post_Service = (parent, args, ctx) => {
             return post
         }
     })
+    const originalPost = {...post}
+
     if (!post) {
         throw new Error("Post Doesn't Exists")
     }
@@ -72,9 +80,35 @@ const Update_Post_Service = (parent, args, ctx) => {
 
     if (typeof data.published === "boolean") {
         post.published = data.published
+        if (originalPost.published && !post.published) {
+            // Deleted
+            ctx.pubsub.publish("post", {
+                post: {
+                    mutation: "DELETED",
+                    data: originalPost
+                }
+            })
+        } else if (!originalPost.published && post.published) {
+            // Created
+            ctx.pubsub.publish("post", {
+                post: {
+                    mutation: "CREATED",
+                    data: post
+                }
+            })
+        }
+    }else if (post.published) {
+        // Updated
+        ctx.pubsub.publish("post", {
+            post: {
+                mutation: "UPDATED",
+                data: post
+            }
+        })
     }
 
     ctx.db.Post[indexPost] = post
+
     return post
 }
 
@@ -86,17 +120,26 @@ const Delete_Post_Services = (parent, args, ctx) => {
         throw new Error("Post Not Found")
     }
 
-    const deletedPost = ctx.db.Post.splice(userIndex, 1)
+    const [post] = ctx.db.Post.splice(userIndex, 1)
     ctx.db.Post.splice(userIndex, 1)
 
-    return deletedPost[0]
+    if (post.published) {
+        ctx.pubsub.publish("post", {
+            post: {
+                mutation: "DELETED",
+                data: post
+            }
+        })
+    }
+
+    return post
 }
 
 
 const Services = {
     CreatePost: Create_Post_Service,
-    GetPost: GetPost,
-    GetAuthorPost: GetAuthorPost,
+    GetPost: Get_Post_Service,
+    GetAuthorPost: Get_Author_Post_Service,
     GetPostComments: Get_Post_Comments,
     UpdatePost: Update_Post_Service,
     DeletePost: Delete_Post_Services

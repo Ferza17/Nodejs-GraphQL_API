@@ -46,7 +46,7 @@ let PostDummyData = [
         id: "POST3",
         title: "A New Post 3",
         body: "First Post Body 3",
-        published: false,
+        published: true,
         author: "EFG123",
     }
 ]

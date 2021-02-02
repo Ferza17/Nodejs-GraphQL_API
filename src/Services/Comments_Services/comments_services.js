@@ -17,6 +17,13 @@ const Create_Comments_Services = async (parent, args, ctx) => {
     }
 
     ctx.db.Comment.push(comment)
+
+    ctx.pubsub.publish(`comment ${args.data.post}`, {
+        comment: {
+            mutation: "CREATED",
+            data: comment
+        }
+    })
     return comment
 }
 
@@ -58,6 +65,13 @@ const Update_Comment_Services = (parent, args, ctx) => {
         comment.text = args.text
     }
 
+    ctx.pubsub.publish(`comment ${comment.post}`, {
+        comment: {
+            mutation: "UPDATED",
+            data: comment
+        }
+    })
+
     ctx.db.Comment[indexComment] = comment
 
     return comment
@@ -70,9 +84,16 @@ const Delete_Comment_Services = (parent, args, ctx) => {
         throw new Error("Unable to find Comment with that ID")
     }
 
-    const deletedComment = ctx.db.Comment.splice(commentIndex, 1)
+    const [comment] = ctx.db.Comment.splice(commentIndex, 1)
 
-    return deletedComment[0]
+    ctx.pubsub.publish(`comment ${comment.post}`, {
+        comment: {
+            mutation: "DELETED",
+            data: comment
+        }
+    })
+
+    return comment
 }
 
 const Services = {
